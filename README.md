@@ -1,1 +1,6 @@
 # CRC_ctDNA_WGS_Analysis
+
+This repository contain the R scrips nessesary for producing the figures and statistical analysis in relation to the article entiteled "Detection of circulating tumor DNA by whole-genome sequencing enables prediction of recurrence in stage III colorectal cancer patients".
+
+
+To protect the privacy and confidentiality of patients in this study, personal data including clinical and sequence data are not made publicly available in this repository or the supplementary material of the article. The data can be requested at any time from the corresponding author.
