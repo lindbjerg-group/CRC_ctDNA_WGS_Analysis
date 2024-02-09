@@ -1,0 +1,373 @@
+---
+title: "c2i figures code"
+author: "Maja Kuzman"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r, warning=FALSE, message=FALSE}
+library(data.table)
+library(ggplot2)
+library(RColorBrewer)
+
+```
+
+## Figure2:
+
+### A) See separate R scipt entitled "Figure 2A".
+
+### B) 
+
+```{r}
+ci <- fread("sample_msi_indel_snv_tmb_wgd.csv")
+ci[,`MSI status`:= factor(as.character(`MSI status`), levels=c("MSS","MSI"))]
+set.seed(191)
+(plb1 <- ggplot(ci, aes(`MSI status`, N_SNVs, fill=`MSI status`))+
+    geom_boxplot(outlier.colour = NA)+
+    geom_jitter(pch=21,fill="black")+
+    theme_light()+
+    ylab("Tumor mutational burden 
+       (SNVs)")+
+    scale_y_log10()+
+    theme(text=element_text(size=18), legend.position = "none")+
+    scale_fill_manual(values = c("MSS"="#95212A","MSI"="#5C5A5B"))
+)
+
+
+
+
+```
+
+### C) 
+
+```{r}
+(plb2 <- ggplot(ci, aes(`MSI status`, N_INDELs, fill=`MSI status`))+
+    geom_boxplot(outlier.colour = NA)+
+    theme_light()+
+    geom_jitter(pch=21, fill="black")+
+    ylab("Tumor mutational burden 
+       (INDELs)")+
+    scale_y_log10()+
+    theme(text=element_text(size=18), legend.position = "none")+
+    scale_fill_manual(values = c("MSS"="#95212A","MSI"="#5C5A5B"))
+)
+
+```
+
+### D) 
+
+```{r}
+fp <- ci[, .N, by=c("WGD", "MSI status")]
+fp[,perc:=paste0(round(N/sum(N)*100), "%\n(n=",N,")" ),`MSI status`]
+
+(plc <- ggplot(fp, aes(`MSI status`, N, fill=WGD))+
+        geom_bar(position="fill", stat="identity", color='black')+
+        theme_bw()+
+        xlab("MSI status")+
+        ylab("")+
+        ggtitle("%tumors with WGD")+
+        theme(text=element_text(size=18),
+              strip.background = element_rect(colour="black", fill="white"),
+              strip.text = element_text(color="black"))+
+        scale_fill_manual(values = c("WGD"="#ba6e6e","No WGD"="#93bedf"))+
+        scale_y_continuous (labels = scales::percent)+
+        theme(legend.title = element_blank())+
+    geom_text(aes(label=perc), position=position_fill(vjust=0.5), size=8)
+  
+  )
+
+```
+
+### E) 
+
+```{r, fig.width=6, fig.height=4}
+plotfor <- function(msistatus){
+  c_data <- fread("DRIVERS_BIOMARKERS_freq_MSS_MSI-Cosmic.csv", 
+                  header = TRUE, stringsAsFactors = FALSE, sep = ",")
+  c_data[,perc:=N/totalN]
+  forplot <- c_data[,.SD[1:20],MSIstatus]
+
+  forplota <- forplot[MSIstatus==msistatus]
+  forplota[,Symbol:=factor(as.character(Symbol), levels=Symbol)]
+  ggplot(forplota, aes(Symbol, perc, fill=MSIstatus))+
+    theme_bw()+
+    geom_bar(stat="identity", width=1)+
+    facet_wrap(~MSIstatus)+
+    coord_cartesian(ylim=c(0,1))+
+    theme(axis.text.x = element_text(angle=90, vjust = 0.5, hjust=1), 
+          axis.line = element_line(colour = "black"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.background = element_blank(),
+          axis.ticks.x = element_blank(),
+          strip.background = element_rect(colour="white", fill="white"),
+          strip.text = element_text(color="black"),
+          legend.position = "none"
+    )+
+    xlab("")+ylab("")+
+    scale_fill_manual(values = c("MSS"="#7b1b32","MSI"="black"))
+  
+}
+
+plotfor("MSS")
+```
+
+### F) 
+
+```{r, fig.width=6, fig.height=4}
+plotfor("MSI")
+```
+
+## Figure 5: Tumor evolution
+
+### A) Manually made.    
+
+### B) 
+
+
+```{r}
+cn_change <- read.table("cn_change.txt",
+        header = TRUE, stringsAsFactors = FALSE, sep = "\t", check.names = FALSE)
+
+muts_intersect <- read.table("activities_fitting_intersect.txt",
+        header = TRUE, stringsAsFactors = FALSE, sep = "\t", check.names = FALSE)
+colnames(muts_intersect) <- sub("_cfdna", "", colnames(muts_intersect))
+
+muts_plasma <- read.table("activities_fitting_plasma.txt",
+         header = TRUE, stringsAsFactors = FALSE, sep = "\t", check.names = FALSE)
+colnames(muts_plasma) <- sub("_cfdna", "", colnames(muts_plasma))
+
+snv_change <- colSums(muts_intersect[,-1]) / (colSums(muts_plasma[,-1]) + colSums(muts_intersect[,-1]))
+
+cn_change <- cn_change[,colnames(cn_change) %in% colnames(muts_intersect)]
+cn_change <- cn_change[,colnames(muts_intersect)[-1]]
+
+par(mfrow = c(2,1), las = 2, bty = "l", mar = c(6,4,4,4))
+
+barplot(snv_change, ylim = c(0,1), border = "NA", col = "#671224", ylab = "% plasma mutation shared with tumor")
+#manual annotation of "Plasma Day" for each samples.
+#manual annotation with dashed lines indicating which samples are from which patients 
+
+barplot(as.matrix(cn_change["cn_change",] / cn_change["total",]),
+        ylim = c(0,0.5), border = "NA", col = "#29235C", ylab = "% CN plasma vs. primary tumor")
+#manual annotation of "Plasma Day" for each samples.
+#manual annotation with dashed lines indicating which samples are from which patients
+
+```
+
+### C) 
+
+
+```{r}
+muts_intersect <- read.table("activities_fitting_intersect.txt",
+                             header = TRUE, stringsAsFactors = FALSE, sep = "\t", check.names = FALSE)
+colnames(muts_intersect)[1] <- "Signature"
+colnames(muts_intersect) <- sub("cfdna", "shared", colnames(muts_intersect))
+muts_plasma <- read.table("activities_fitting_plasma.txt",
+                          header = TRUE, stringsAsFactors = FALSE, sep = "\t", check.names = FALSE)
+colnames(muts_plasma)[1] <- "Signature"
+muts_solid <-  read.table("activities_fitting_tumor.txt",
+                          header = TRUE, stringsAsFactors = FALSE, sep = "\t", check.names = FALSE)
+colnames(muts_solid)[1] <- "Signature"
+colnames(muts_solid) <- sub("cfdna", "solid", colnames(muts_solid))
+
+
+muts_solid <- muts_solid[order(muts_solid$Signature),]
+muts_intersect <- muts_intersect[order(muts_intersect$Signature),]
+muts_plasma <- muts_plasma[order(muts_plasma$Signature),]
+
+muts_solid[,-1] <- -1 * muts_solid[,-1]
+muts_plasma[,-1] <- -1 * muts_plasma[,-1]
+
+
+muts_evo <- cbind(cbind(muts_solid, muts_intersect[,-1]), muts_plasma[,-1])
+
+m_evo <- muts_evo[,-1][,order(colnames(muts_evo[-1]), decreasing = TRUE)]
+rownames(m_evo) <- muts_evo$Signature
+
+#remove if we don't have the 3 values
+
+not_all <- table(sub("_[Ppsc].*" , "", colnames(m_evo)))
+c_blank <- data.frame(matrix(NaN, ncol = nrow(m_evo), nrow = length(not_all)), row.names = paste0(names(not_all), "_blank"))
+m_evo <- cbind(m_evo, t(c_blank))
+m_evo <- m_evo[,order(colnames(m_evo), decreasing = TRUE)]
+
+not_all <- names(not_all)[not_all < 3]
+for(i in not_all){
+  m_evo <- m_evo[,-grep(i, colnames(m_evo))]  
+}
+
+m_evo <- m_evo[rowSums(m_evo, na.rm = TRUE) != 0, ]
+
+for(i in unique(sub("[sSbBpP].*", "", colnames(m_evo)))){ # remove if you don't want to normalize
+  c_cols <- grep(i, colnames(m_evo))
+  m_evo[,c_cols] <- m_evo[,c_cols] / sum(abs(m_evo[, c_cols]), na.rm = TRUE)
+}
+colnames(m_evo)[grep("blank", colnames(m_evo))] <- ""
+
+par(mfrow = c(1,1), bty = "l", las = 2, mar = c(10,4,4,4))
+c_colors <- c(RColorBrewer::brewer.pal(8, "Pastel1"), RColorBrewer::brewer.pal(8, "Dark2"))
+barplot(t(t(abs(as.matrix(m_evo)))/colSums(abs(as.matrix(m_evo)))), names = colnames(m_evo), col = c_colors, ylim = c(0,1.5), yaxt = "n")
+axis(2, at = seq(0,1,0.2), labels = seq(0,1,0.2))
+
+legend(x = 1, y = 1.5, legend = rownames(m_evo),
+       fill = c_colors, ncol = ceiling(length(c_colors)/3), cex = 0.7, bty = "n")
+
+```
+
+### D) 
+
+```{r}
+makemehightfplot <- function(x, subjectid){
+  x <- x[subjectID==subjectid]
+  pl <- ggplot(x, aes(start))+
+    geom_rect(data=x[marked_interesting=="No"],aes(xmin=start,xmax=end,fill=useme,ymin=ymi,ymax=yma))+
+    geom_rect(data=x[marked_interesting=="Yes"],aes(xmin=start,xmax=end,fill=useme,ymin=ymi,ymax=yma))+
+    geom_hline(yintercept = 0, linetype="dashed",color="gray")+
+    facet_grid(sampleID~factor(as.character(chrom), levels=c(1:22,"X")), switch = "both", space="free", scales="free")+ 
+    theme_bw() +
+    theme(legend.position="right",
+          legend.title = element_blank(),
+          panel.grid.major = element_blank(),
+          panel.spacing = unit(0,"line"),
+          panel.grid.minor = element_blank(),
+          strip.background = element_blank(),
+          panel.border = element_rect(colour = "black", fill = NA),
+          strip.text.x=element_text(size=12),
+          axis.title=element_blank(),
+          axis.text=element_blank(),
+          axis.ticks=element_blank(),
+          text=element_text(size=18)
+    )+
+    scale_fill_manual(values=c("New loss"="#2c7bb6","New gain"="#b2182b", "Gain"="#f4a582", "Loss"="#92c5de"))+
+    theme(legend.position = "bottom")+
+    coord_cartesian(ylim=c(-2,2))+
+    ggtitle("")
+  pl
+}
+x <- fread("CNAplotdata.csv")
+
+(plot2 <- makemehightfplot(x, "CRC-071"))
+
+hightfplot <- function(x, subjectid){
+  pppp <- x[subjectID==subjectid]
+  fillcolors <- c("#67001f","#980043","#e7298a","#c994c7","#f7f4f9")
+  NN <- pppp[,uniqueN(variable)]
+  pppp[,variable:=factor(as.character(variable), levels = rev(unique(variable)))]
+  pppp[,Origin:=factor(as.character(Origin), levels = rev(unique(variable)))]
+  ggplot(pppp, aes(variable, N, fill=Origin))+
+    geom_bar(position="stack", stat="identity")+# geom_vline(xintercept = 0:NN+0.5)+
+    theme_minimal()+ xlab("")+ylab("")+
+    scale_fill_manual(values=rev(fillcolors[1:NN]))+
+    coord_flip()+
+    theme(text = element_text(color="black", size=14))+
+    theme(#legend.title = element_blank(),
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      axis.text = element_text(color="black"),
+      text = element_text(size=12),
+      aspect.ratio=(1/9)*NN/3
+    )+
+    ggtitle(subjectid)+
+    guides(fill = guide_legend(reverse = TRUE))+
+    geom_text(
+      aes(label=paste0(perc, "%")),
+              #position=position_fill(vjust=0.5),
+              position=position_stack(vjust=0.5),
+      color="white", size=5)
+
+}
+xx <- fread("paper_perc_highTFplasma_tumor_plot.csv")
+hightfplot(xx, subjectid = "CRC-071")
+
+
+```
+
+
+### E) SNVs:
+
+
+```{r}
+system("Rscript Plot96.R -t 8 -i TNC_Allpatients_PlasmaTumorShared.csv -A where -p no -e yes -x yes -B paperID -o crc091_PlasmaTumorShared --figureformat png -f \"paperID=='CRC-091'\" ")
+
+```
+
+
+```{r}
+hightfplot(xx, subjectid = "CRC-091")
+
+```
+
+
+![](crc091_PlasmaTumorShared_96matrixallSNVs.png)  
+
+
+## Suppl. Figure 4: Copy number alterations in high ctDNA samples
+
+
+
+```{r}
+makemehightfplot(x, "CRC-039")
+makemehightfplot(x, "CRC-041")
+makemehightfplot(x, "CRC-059")
+makemehightfplot(x, "CRC-071")
+makemehightfplot(x, "CRC-084")
+makemehightfplot(x, "CRC-091")
+makemehightfplot(x, "CRC-101")
+makemehightfplot(x, "CRC-104")
+
+
+
+```
+
+
+## Suppl. Figure 5: Signatures in plasma from non-recurrence patients
+
+
+
+```{r}
+
+system("Rscript plotFittingActivities.R -i activities_fitting_paperIDs.txt -o MOMA_Colon_supp_fig_5.png -l Yes -a Yes")
+
+```
+
+![](MOMA_Colon_supp_fig_5.png)
+
+## Suppl. Figure 6: Timeline for mutational events in CRC-071
+
+```{r, fig.height=8, fig.width=8}
+X <- fread("CRC-071-plasmaVAF.csv")
+pp <- fread("CRC-071-plasmaVAF_meds.csv")
+suppplotVAF <- ggplot(X, aes(AF, color=wha))
+    suppplotVAF <- suppplotVAF +    
+      geom_vline(xintercept=c(0.2, 0.4), linewidth=1.4, linetype="dashed", color="gray")+
+      geom_vline(xintercept=c(0.1), linewidth=1.4, linetype="dashed", color="pink")+
+      annotate("text", x=0.14, y=15, label= "VAF=0.1", color="pink")+
+      annotate("text", x=0.28, y=15, label= "VAF=0.2", color="gray")+
+      annotate("text", x=0.48, y=15, label= "VAF=0.4", color="gray")
+colstofill <-  c("T>G in CTT"="pink","Not T>G in CTT"="black")
+
+    suppplotVAF <- suppplotVAF+
+    theme_bw()+
+    geom_histogram(aes(y=..density.., fill=wha), position = "dodge", binwidth = 0.01)+
+    facet_wrap(~sampleID, ncol=1)+
+    theme(legend.title = element_blank(),
+          legend.position = "top",
+          strip.background = element_rect(fill='white', colour='white'),
+          text = element_text(size=22))+
+    scale_color_manual(values = colstofill)+
+    scale_fill_manual(values = colstofill)+
+    ylab("density")+ xlab("VAF")+ggtitle("CRC-071")
+  
+  suppplotVAF
+
+```
+
+
+```{r}
+system("Rscript Plot96.R -t 8 -i TNC_Allpatients_PlasmaTumorShared.csv -A where -p no -e yes -x yes -B paperID -o crc071_PlasmaTumorShared --figureformat png -f \"paperID=='CRC-071'\"")
+
+```
+![](crc071_PlasmaTumorShared_96matrixallSNVs.png) 
+
