@@ -46,9 +46,6 @@ Feel free to explore and modify the code according to your needs.
 **Data Availability**  
 To protect the privacy and confidentiality of patients in this study, personal data including clinical and sequence data (that is, the .csv and .txt files called in the scripts) are not made publicly available in this repository or the supplementary material of the article. The data can be requested at any time from the corresponding author. Additional info on which data is available and how to request them can be found at https://genome.au.dk/library/GDK000005/.
 
-**Simulated Datasets**  
-Simulated datasets required for running the code are provided in this repository.
-
 **Expected Output**  
 The code in this repository generates the figures and statistical analyses presented in the article titled "Detection of Circulating Tumor DNA by Whole-Genome Sequencing Enables Prediction of Recurrence in Stage III Colorectal Cancer Patients".
 
