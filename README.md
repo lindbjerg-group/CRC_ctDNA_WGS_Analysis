@@ -4,22 +4,21 @@ This repository contain the R scrips nessesary for producing the figures and sta
 # System requirements
 R: The code in this repository was written in R (version 4.3.1). If you don't have R installed on your system, you can download it from the official R website (https://www.r-project.org/).
 Furterhmore, the following R packages are required to execute the code successfully:
-argparse
-colorRampPalette
-cowplot
-data.table
-dplyr
-ggplot2
-ggpubr
-optparse
-psych
-ragg
-RColorBrewer
-scales
-stringr
-survival
-survminer
-tidyr
+  argparse
+  colorRampPalettecowplot
+  data.table
+  dplyr
+  ggplot2
+  ggpubr
+  optparse
+  psych
+  ragg
+  RColorBrewer
+  scales
+  stringr
+  survival
+  survminer
+  tidyr
 
 # Installation guide
 To run the code in this repository, you'll need to have R and certain R packages installed on your system. Follow the steps below to set up your R environment:
