@@ -19,7 +19,9 @@ Furtermore, the following R packages are required to execute the code successful
   - stringr  
   - survival  
   - survminer  
-  - tidyr  
+  - tidyr
+
+Note that installation of R packages may take up to a few minutes.
 
 # Installation guide
 To run the code in this repository, you'll need to have R and certain R packages installed on your system. Follow the steps below to set up your R environment:
