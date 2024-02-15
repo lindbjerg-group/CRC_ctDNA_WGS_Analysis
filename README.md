@@ -61,11 +61,11 @@ Each R script in this repository requires at least one .csv or .txt file as inpu
 Ensure you have the required .csv or .txt file(s) ready for input.
 
 **2. Specify File Location**  
-Before running the scripts, specify the location of the input file(s). This can be done in two ways:
-Using setwd(): Use the setwd() function to set your working directory to the location where the input file(s) are located. For example:
-setwd("path_to_your_working_directory")
-Insert Entire Filepath: Alternatively, you can directly insert the entire filepath of the input file(s) in the script. For example:
-data <- read.csv("full_filepath_to_your_file.csv")
+Before running the scripts, specify the location of the input file(s). This can be done in two ways:  
+Using setwd(): Use the setwd() function to set your working directory to the location where the input file(s) are located.  
+For example: setwd("path_to_your_working_directory")  
+Insert Entire Filepath: Alternatively, you can directly insert the entire filepath of the input file(s) in the script.  
+For example: data <- read.csv("full_filepath_to_your_file.csv")
 
 **3. Run the Script**  
 Once you've specified the location of the input file(s), you can run the script in your R environment (e.g., RStudio) by sourcing the script file or running individual code chunks.
