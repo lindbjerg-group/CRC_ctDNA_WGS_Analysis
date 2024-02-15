@@ -3,7 +3,7 @@ This repository contain the R scrips nessesary for producing the figures and sta
 
 # System requirements
 **R**  
-The code in this repository was written in R (version 4.3.1). If you don't have R installed on your system, you can download it from the official R website (https://www.r-project.org/).
+The code in this repository was written tested using R version 4.3.1. If you don't have R installed on your system, you can download it from the official R website (https://www.r-project.org/).
 Furtermore, the following R packages are required to execute the code successfully:  
   - argparse  
   - colorRampPalettecowplot  
